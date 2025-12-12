@@ -83,58 +83,86 @@ public class FinanceManager {
          + "Total Expense: " + String.format("%.2f", expense) + "\n"
          + "Net Balance: " + String.format("%.2f", net) + "\n"
          + "----------------------------------------------";
-}
-
-public String getDailyReport() {
-    LocalDate today = LocalDate.now();
-    return buildPeriodReport("Daily Report", today, today);
-}
-
-public String getWeeklyReport() {
-    LocalDate today = LocalDate.now();
-    LocalDate start = today.with(DayOfWeek.MONDAY);
-    LocalDate end = start.plusDays(6);
-    return buildPeriodReport("Weekly Report", start, end);
-}
-
-public String getMonthlyReport() {
-    LocalDate today = LocalDate.now();
-    LocalDate start = today.withDayOfMonth(1);
-    LocalDate end = start.plusMonths(1).minusDays(1);
-    return buildPeriodReport("Monthly Report", start, end);
-}
-
-
-private String buildPeriodReport(String title, LocalDate start, LocalDate end) {
-    double income = 0.0;
-    double expense = 0.0;
-
-    for (Transaction t : transactions) {
-        LocalDate d;
-        try {
-            d = LocalDate.parse(t.getDate()); // expects YYYY-MM-DD
-        } catch (Exception ex) {
-            continue; // skip invalid date rows
-        }
-
-        if (d.isBefore(start) || d.isAfter(end)) continue;
-
-        if (isIncome(t)) income += t.getAmount();
-        else expense += t.getAmount();
     }
 
-    double net = income - expense;
+    public String getDailyReport() {
+        LocalDate today = LocalDate.now();
+        return buildPeriodReport("Daily Report", today, today);
+    }
 
-    return "--------------" + title + "--------------\n"
-         + "Range: " + start + " to " + end + "\n"
-         + "Total Income: " + String.format("%.2f", income) + "\n"
-         + "Total Expense: " + String.format("%.2f", expense) + "\n"
-         + "Net Balance: " + String.format("%.2f", net) + "\n"
-         + "----------------------------------------------";
+    public String getWeeklyReport() {
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.with(DayOfWeek.MONDAY);
+        LocalDate end = start.plusDays(6);
+        return buildPeriodReport("Weekly Report", start, end);
+    }
+
+    public String getMonthlyReport() {
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+        return buildPeriodReport("Monthly Report", start, end);
+    }
+
+
+    private String buildPeriodReport(String title, LocalDate start, LocalDate end) {
+        double income = 0.0;
+        double expense = 0.0;
+
+        for (Transaction t : transactions) {
+            LocalDate d;
+            try {
+                d = LocalDate.parse(t.getDate()); // expects YYYY-MM-DD
+            } catch (Exception ex) {
+                continue; // skip invalid date rows
+            }
+
+            if (d.isBefore(start) || d.isAfter(end)) continue;
+
+            if (isIncome(t)) income += t.getAmount();
+            else expense += t.getAmount();
+        }
+
+        double net = income - expense;
+
+        return "--------------" + title + "--------------\n"
+            + "Range: " + start + " to " + end + "\n"
+            + "Total Income: " + String.format("%.2f", income) + "\n"
+            + "Total Expense: " + String.format("%.2f", expense) + "\n"
+            + "Net Balance: " + String.format("%.2f", net) + "\n"
+            + "----------------------------------------------";
     }
 
     public boolean isIncome(Transaction t) {
         String type = t.getType();
         return type != null && type.equalsIgnoreCase("Income");
     }
+
+    public List<Transaction> searchByDate(String date) {
+        List<Transaction> results = new ArrayList<>();
+        if (date == null) return results;
+
+        String target = date.trim();
+        for (Transaction t : transactions) {
+            if (t.getDate() != null && t.getDate().trim().equals(target)) {
+                results.add(t);
+            }
+        }
+        return results;
+    }
+
+    public List<Transaction> searchByCategory(String category) {
+        List<Transaction> results = new ArrayList<>();
+        if (category == null) return results;
+
+        String target = category.trim().toLowerCase();
+        for (Transaction t : transactions) {
+            String cat = t.getCategory();
+            if (cat != null && cat.trim().toLowerCase().equals(target)) {
+                results.add(t);
+            }
+        }
+        return results;
+    }
+
 }
