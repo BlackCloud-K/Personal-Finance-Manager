@@ -131,5 +131,10 @@ private String buildPeriodReport(String title, LocalDate start, LocalDate end) {
          + "Total Expense: " + String.format("%.2f", expense) + "\n"
          + "Net Balance: " + String.format("%.2f", net) + "\n"
          + "----------------------------------------------";
-}
+    }
+
+    public boolean isIncome(Transaction t) {
+        String type = t.getType();
+        return type != null && type.equalsIgnoreCase("Income");
+    }
 }

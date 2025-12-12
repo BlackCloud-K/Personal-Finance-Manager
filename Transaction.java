@@ -56,9 +56,4 @@ class Transaction {
     public String toString() {
         return "ID: " + id + ", Type: " + type + ", Amount: " + amount + ", Date: " + date + ", Description: " + description + ", Category: " + category;
     }
-
-    public boolean isIncome(Transaction t) {
-    String type = t.getType();
-    return type != null && type.equalsIgnoreCase("Income");
-}
 }
