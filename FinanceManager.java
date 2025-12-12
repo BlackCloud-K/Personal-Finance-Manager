@@ -230,7 +230,7 @@ public class FinanceManager {
             + "----------------------------------------------";
     }
 
-    public boolean isIncome(Transaction t) {
+    private boolean isIncome(Transaction t) {
         String type = t.getType();
         return type != null && type.equalsIgnoreCase("Income");
     }
