@@ -15,12 +15,14 @@ public class FinanceManager {
         try {
             List<String> lines = Files.readAllLines(Paths.get(filepath), StandardCharsets.UTF_8);
             for (String line : lines) {
+                if (line.trim().isEmpty()) continue;
                 String[] parts = line.split(",");
-                double amount = Double.parseDouble(parts[0]);
-                String date = parts[1];
-                String description = parts[2];
-                String category = parts[3];
-                transactions.add(new Transaction(amount, date, description, category));
+                int id = Integer.parseInt(parts[0]);
+                double amount = Double.parseDouble(parts[1]);
+                String category = parts[2];
+                String date = parts[3];
+                String description = parts[4];
+                transactions.add(new Transaction(id, amount, date, description, category));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -28,7 +30,7 @@ public class FinanceManager {
     }
 
     public void addTransaction(double amount, String category, String type, String date, String description){
-        Transaction newTransaction = new Transaction(amount, category, date, description);
+        Transaction newTransaction = new Transaction(amount, date, description, category);
         transactions.add(newTransaction);
     }
 
@@ -36,11 +38,22 @@ public class FinanceManager {
         try {
             List<String> lines = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                lines.add(transaction.getAmount() + "," + transaction.getCategory() + "," + transaction.getDate() + "," + transaction.getDescription());
+                lines.add(transaction.getId() + "," + transaction.getAmount() + "," + transaction.getCategory() + "," + transaction.getDate() + "," + transaction.getDescription());
             }
             Files.write(Paths.get(filepath), lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void deleteTransaction(int transactionId){
+        boolean removed = transactions.removeIf(t -> t.getId() == transactionId);
+        if (!removed) {
+            throw new IllegalArgumentException("Transaction not found");
         }
     }
 }

@@ -14,6 +14,7 @@ public class AddNewCLI {
         String type = scanner.nextLine();
         System.out.println("Enter the amount: ");
         double amount = scanner.nextDouble();
+        scanner.nextLine();
         System.out.println("Enter the category: ");
         String category = scanner.nextLine();
         System.out.println("Enter the date(YYYY-MM-DD): ");
@@ -24,7 +25,5 @@ public class AddNewCLI {
         System.out.println("Transaction added successfully");
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
-        System.out.println("--------------------------------");
-        scanner.close();
     }
 }
