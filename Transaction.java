@@ -1,23 +1,26 @@
 class Transaction {
     private int id;
     private double amount;
+    private String type;
     private String date;
     private String description;
     private String category;
     private static int nextId = 1;
 
-    public Transaction(double amount, String date, String description, String category) {
+    public Transaction(String type, double amount, String date, String description, String category) {
         this.id = nextId;
         this.amount = amount;
+        this.type = type;
         this.date = date;
         this.description = description;
         this.category = category;
         nextId++;
     }
 
-    public Transaction(int id, double amount, String date, String description, String category) {
+    public Transaction(int id, String type, double amount, String date, String description, String category) {
         this.id = id;
         this.amount = amount;
+        this.type = type;
         this.date = date;
         this.description = description;
         this.category = category;
@@ -46,7 +49,11 @@ class Transaction {
         return category;
     }
 
+    public String getType() {
+        return type;
+    }
+
     public String toString() {
-        return "ID: " + id + ", Amount: " + amount + ", Date: " + date + ", Description: " + description + ", Category: " + category;
+        return "ID: " + id + ", Type: " + type + ", Amount: " + amount + ", Date: " + date + ", Description: " + description + ", Category: " + category;
     }
 }

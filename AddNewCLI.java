@@ -10,8 +10,18 @@ public class AddNewCLI {
     public void enterDetails() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("--------------Add Transaction----------------");
-        System.out.println("Enter the Transaction Type(Income/Expense): ");
-        String type = scanner.nextLine();
+        
+        String type;
+        while (true) {
+            System.out.println("Enter the Transaction Type(Income/Expense): ");
+            type = scanner.nextLine().trim();
+            if (isValidType(type)) {
+                break;
+            } else {
+                System.out.println("Invalid type! Please enter 'Income' or 'Expense'.");
+            }
+        }
+        
         System.out.println("Enter the amount: ");
         double amount = scanner.nextDouble();
         scanner.nextLine();
@@ -21,9 +31,20 @@ public class AddNewCLI {
         String date = scanner.nextLine();
         System.out.println("Enter the description: ");
         String description = scanner.nextLine();
-        manager.addTransaction(amount, category, type, date, description);
-        System.out.println("Transaction added successfully");
+        
+        try {
+            manager.addTransaction(amount, category, type, date, description);
+            System.out.println("Transaction added successfully");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Transaction not added.");
+        }
+        
         System.out.println("Press Enter to continue...");
         scanner.nextLine();
+    }
+    
+    private boolean isValidType(String type) {
+        return type != null && (type.equalsIgnoreCase("Income") || type.equalsIgnoreCase("Expense"));
     }
 }

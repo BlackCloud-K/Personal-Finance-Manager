@@ -20,11 +20,12 @@ public class FinanceManager {
                 if (line.trim().isEmpty()) continue;
                 String[] parts = line.split(",");
                 int id = Integer.parseInt(parts[0]);
-                double amount = Double.parseDouble(parts[1]);
-                String category = parts[2];
-                String date = parts[3];
-                String description = parts[4];
-                transactions.add(new Transaction(id, amount, date, description, category));
+                String type = parts[1];
+                double amount = Double.parseDouble(parts[2]);
+                String category = parts[3];
+                String date = parts[4];
+                String description = parts[5];
+                transactions.add(new Transaction(id, type, amount, date, description, category));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -32,15 +33,22 @@ public class FinanceManager {
     }
 
     public void addTransaction(double amount, String category, String type, String date, String description){
-        Transaction newTransaction = new Transaction(amount, date, description, category);
+        if (!isValidType(type)) {
+            throw new IllegalArgumentException("Transaction type must be 'Income' or 'Expense', but got: " + type);
+        }
+        Transaction newTransaction = new Transaction(type, amount, date, description, category);
         transactions.add(newTransaction);
+    }
+    
+    private boolean isValidType(String type) {
+        return type != null && (type.equalsIgnoreCase("Income") || type.equalsIgnoreCase("Expense"));
     }
 
     public void saveToFile(){
         try {
             List<String> lines = new ArrayList<>();
             for (Transaction transaction : transactions) {
-                lines.add(transaction.getId() + "," + transaction.getAmount() + "," + transaction.getCategory() + "," + transaction.getDate() + "," + transaction.getDescription());
+                lines.add(transaction.getId() + "," + transaction.getType() + "," + transaction.getAmount() + "," + transaction.getCategory() + "," + transaction.getDate() + "," + transaction.getDescription());
             }
             Files.write(Paths.get(filepath), lines, StandardCharsets.UTF_8);
         } catch (IOException e) {
