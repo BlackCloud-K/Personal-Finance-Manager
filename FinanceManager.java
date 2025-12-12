@@ -21,7 +21,15 @@ public class FinanceManager {
             List<String> lines = Files.readAllLines(Paths.get(filepath), StandardCharsets.UTF_8);
             for (String line : lines) {
                 if (line.trim().isEmpty()) continue;
-                String[] parts = line.split(",");
+                String[] parts = line.split(",", -1);
+                if (parts.length < 6) {
+                    // 如果字段不足，用空字符串填充
+                    String[] newParts = new String[6];
+                    for (int i = 0; i < 6; i++) {
+                        newParts[i] = (i < parts.length) ? parts[i] : "";
+                    }
+                    parts = newParts;
+                }
                 int id = Integer.parseInt(parts[0]);
                 String type = parts[1];
                 double amount = Double.parseDouble(parts[2]);
