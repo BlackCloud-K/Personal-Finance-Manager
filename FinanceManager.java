@@ -30,10 +30,9 @@ public class FinanceManager {
     public void addTransaction(double amount, String category, String type, String date, String description){
         Transaction newTransaction = new Transaction(amount, category, date, description);
         transactions.add(newTransaction);
-        saveTransactions();
     }
 
-    public void saveTransactions(){
+    public void saveToFile(){
         try {
             List<String> lines = new ArrayList<>();
             for (Transaction transaction : transactions) {
