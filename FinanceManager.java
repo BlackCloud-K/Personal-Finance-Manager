@@ -4,8 +4,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class FinanceManager {
     private List<Transaction> transactions;
@@ -86,22 +89,120 @@ public class FinanceManager {
     }
 
     public String getDailyReport() {
-        LocalDate today = LocalDate.now();
-        return buildPeriodReport("Daily Report", today, today);
+        Set<LocalDate> datesWithData = new TreeSet<>();
+        
+        for (Transaction t : transactions) {
+            LocalDate d = parseDate(t.getDate());
+            if (d != null) {
+                datesWithData.add(d);
+            }
+        }
+        
+        if (datesWithData.isEmpty()) {
+            return "--------------Daily Report--------------\n"
+                + "No transactions found\n"
+                + "----------------------------------------------";
+        }
+        
+        StringBuilder report = new StringBuilder();
+        report.append("--------------Daily Report--------------\n");
+        
+        for (LocalDate date : datesWithData) {
+            String dayReport = buildPeriodReport("", date, date);
+            String[] lines = dayReport.split("\n");
+            if (lines.length > 1) {
+                report.append("Date: ").append(date).append("\n");
+                for (int i = 1; i < lines.length - 1; i++) {
+                    if (lines[i].startsWith("Range:")) continue;
+                    report.append(lines[i]).append("\n");
+                }
+                report.append("\n");
+            }
+        }
+        
+        report.append("----------------------------------------------");
+        return report.toString();
     }
 
     public String getWeeklyReport() {
-        LocalDate today = LocalDate.now();
-        LocalDate start = today.with(DayOfWeek.MONDAY);
-        LocalDate end = start.plusDays(6);
-        return buildPeriodReport("Weekly Report", start, end);
+        Set<LocalDate> weekStarts = new TreeSet<>();
+        
+        for (Transaction t : transactions) {
+            LocalDate d = parseDate(t.getDate());
+            if (d != null) {
+                LocalDate weekStart = d.with(DayOfWeek.MONDAY);
+                weekStarts.add(weekStart);
+            }
+        }
+        
+        if (weekStarts.isEmpty()) {
+            return "--------------Weekly Report--------------\n"
+                + "No transactions found\n"
+                + "----------------------------------------------";
+        }
+        
+        StringBuilder report = new StringBuilder();
+        report.append("--------------Weekly Report--------------\n");
+        
+        for (LocalDate weekStart : weekStarts) {
+            LocalDate weekEnd = weekStart.plusDays(6);
+            String weekReport = buildPeriodReport("", weekStart, weekEnd);
+            String[] lines = weekReport.split("\n");
+            if (lines.length > 1) {
+                report.append("Week: ").append(weekStart).append(" to ").append(weekEnd).append("\n");
+                for (int i = 1; i < lines.length - 1; i++) {
+                    if (lines[i].startsWith("Range:")) continue;
+                    report.append(lines[i]).append("\n");
+                }
+                report.append("\n");
+            }
+        }
+        
+        report.append("----------------------------------------------");
+        return report.toString();
     }
 
     public String getMonthlyReport() {
-        LocalDate today = LocalDate.now();
-        LocalDate start = today.withDayOfMonth(1);
-        LocalDate end = start.plusMonths(1).minusDays(1);
-        return buildPeriodReport("Monthly Report", start, end);
+        Set<String> monthsWithData = new TreeSet<>();
+        
+        for (Transaction t : transactions) {
+            LocalDate d = parseDate(t.getDate());
+            if (d != null) {
+                String monthKey = d.getYear() + "-" + String.format("%02d", d.getMonthValue());
+                monthsWithData.add(monthKey);
+            }
+        }
+        
+        if (monthsWithData.isEmpty()) {
+            return "--------------Monthly Report--------------\n"
+                + "No transactions found\n"
+                + "----------------------------------------------";
+        }
+        
+        StringBuilder report = new StringBuilder();
+        report.append("--------------Monthly Report--------------\n");
+        
+        for (String monthKey : monthsWithData) {
+            String[] parts = monthKey.split("-");
+            int year = Integer.parseInt(parts[0]);
+            int month = Integer.parseInt(parts[1]);
+            LocalDate monthStart = LocalDate.of(year, month, 1);
+            LocalDate monthEnd = monthStart.plusMonths(1).minusDays(1);
+            
+            String monthReport = buildPeriodReport("", monthStart, monthEnd);
+            String[] lines = monthReport.split("\n");
+            if (lines.length > 1) {
+                report.append("Month: ").append(monthKey).append("\n");
+                for (int i = 1; i < lines.length - 1; i++) {
+                    if (lines[i].startsWith("Range:")) continue;
+                    report.append(lines[i]).append("\n");
+                }
+                report.append("\n");
+            }
+        }
+        
+        report.append("----------------------------------------------");
+        return report.toString();
     }
 
 
@@ -110,12 +211,8 @@ public class FinanceManager {
         double expense = 0.0;
 
         for (Transaction t : transactions) {
-            LocalDate d;
-            try {
-                d = LocalDate.parse(t.getDate()); // expects YYYY-MM-DD
-            } catch (Exception ex) {
-                continue; // skip invalid date rows
-            }
+            LocalDate d = parseDate(t.getDate());
+            if (d == null) continue; // skip invalid date rows
 
             if (d.isBefore(start) || d.isAfter(end)) continue;
 
@@ -136,6 +233,42 @@ public class FinanceManager {
     public boolean isIncome(Transaction t) {
         String type = t.getType();
         return type != null && type.equalsIgnoreCase("Income");
+    }
+
+    private LocalDate parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+        
+        String date = dateStr.trim();
+        
+        try {
+            return LocalDate.parse(date);
+        } catch (DateTimeParseException e) {
+        }
+        
+        if (date.length() == 8 && date.matches("\\d{8}")) {
+            try {
+                int year = Integer.parseInt(date.substring(0, 4));
+                int month = Integer.parseInt(date.substring(4, 6));
+                int day = Integer.parseInt(date.substring(6, 8));
+                return LocalDate.of(year, month, day);
+            } catch (Exception e) {
+            }
+        }
+        
+        String[] parts = date.split("-");
+        if (parts.length == 3) {
+            try {
+                int year = Integer.parseInt(parts[0]);
+                int month = Integer.parseInt(parts[1]);
+                int day = Integer.parseInt(parts[2]);
+                return LocalDate.of(year, month, day);
+            } catch (Exception e) {
+            }
+        }
+        
+        return null;
     }
 
     public List<Transaction> searchByDate(String date) {
