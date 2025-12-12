@@ -7,7 +7,7 @@ public class ViewReportCLI {
         this.manager = manager;
     }
 
-    public void chooseReport() {
+    public void chooseViewReport() {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
