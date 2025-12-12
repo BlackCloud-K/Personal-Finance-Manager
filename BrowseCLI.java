@@ -13,7 +13,7 @@ public class BrowseCLI {
 
         System.out.println("--------------Browse Transactions----------------");
         List<Transaction> transactions = manager.getTransactions();
-        displayTransaction(transactions);
+        displayTransactions(transactions);
         System.out.println("--------------------------------");
         System.out.println("Press 1 to exit...");
         System.out.println("Press 2 delete a transaction...");
@@ -27,13 +27,13 @@ public class BrowseCLI {
 
     }
 
-    public void displayTransaction(List<Transaction> transactions) {
+    private void displayTransactions(List<Transaction> transactions) {
         for (Transaction transaction : transactions) {
             System.out.println(transaction);
         }
     }
 
-    public void chooseDelete() {
+    private void chooseDelete() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("--------------Delete Transaction----------------");
         System.out.println("Enter the transaction ID to delete: ");
